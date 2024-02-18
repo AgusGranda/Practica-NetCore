@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Mvc;
 using Practica.Dtos;
+using Practica.Modelos;
 
 namespace Practica.Controllers
 {
@@ -10,77 +11,80 @@ namespace Practica.Controllers
     [Route("api/[controller]")]
 
 
-    public class PeliculaController : Controller
+    public class PeliculaController : ControllerBase
     {
 
-
-        private static List<Pelicula> Peliculas = new()
+        private readonly IPeliculaRepository _peliculaRepository;
+        
+        public PeliculaController(IPeliculaRepository peliculaRepository)
         {
-            new Pelicula { Id= 1 , Descripcion="Peliculon", Duracion=150, Genero="Fantasia"},
-            new Pelicula { Id= 2 , Descripcion="Moviecon", Duracion=180, Genero="Terror"},
-        };
-
+            _peliculaRepository = peliculaRepository;
+        }
 
 
 
         [HttpGet]
-        public List<Pelicula> ShowAllPeliculas()
+        public IActionResult Get() 
         {
-            return Peliculas;
+            var peliculas = _peliculaRepository.GetAllPeliculas();
+            return Ok(peliculas);
         }
 
 
 
         [HttpGet("{id}")]
-        public Object ShowOnePelicula(int id)
+        public IActionResult Get(int id)
         {
-
-            Pelicula seleccionada = Peliculas.Find(x => x.Id == id);
-            if (seleccionada != null)
-                return seleccionada;
-            else
-                return "No se encontro la peliculita";
-
+            var pelicula = _peliculaRepository.GetPelicula(id);
+            return Ok(pelicula);
+            
 
         }
 
+        //[HttpGet]
+        //public Object FindPeliculas(string genero)
+        //{
+           
+        //}
+
+
+
         [HttpPost]
-        public bool CreatePelicula(Pelicula pelicula)
+        public IActionResult Post(Pelicula pelicula) 
         {
-            Peliculas.Add(pelicula);
-            return true;
+            _peliculaRepository.AddPelicula(pelicula);
+            return CreatedAtAction(nameof(Get), new { Id = pelicula.Id }, pelicula);
         }
 
 
         [HttpPut("{id}")]
-        public string UpdatePelicula(Pelicula pelicula, int id)
+        public IActionResult Put(Pelicula pelicula, int id)
         {
-            Pelicula seleccionada = Peliculas.Find(x => x.Id == id);
-
-            if (seleccionada != null)
+            var peliculaSeleccionada = _peliculaRepository.GetPelicula(id);
+            if (peliculaSeleccionada != null )
             {
-                seleccionada.Duracion = pelicula.Duracion;
-                seleccionada.Descripcion = pelicula.Descripcion;
-                seleccionada.Genero = pelicula.Genero;
-                return "Pelicula modificada correctamente";
+                peliculaSeleccionada.Duracion = pelicula.Duracion;
+                peliculaSeleccionada.Descripcion = pelicula.Descripcion;
+                peliculaSeleccionada.Genero = pelicula.Genero;
+                _peliculaRepository.UpdatePelicula(peliculaSeleccionada);
+                return NoContent();
             }
-            else
-                return "Pelicula no encontrada";
-
+            return NotFound();
 
         }
 
         [HttpDelete("{id}")]
-        public string DeletePelicula(int id)
+        public IActionResult Delete(int id)
         {
-            Pelicula seleccionada = Peliculas.Find(x => x.Id == id);
-            if (seleccionada != null)
+            var pelicula = _peliculaRepository.GetPelicula(id);
+
+            if (pelicula != null)
             {
-                Peliculas.Remove(seleccionada);
-                return "Pelicula eliminada correctamente";
+                _peliculaRepository.DeletePelicula(id);
+                return NoContent();
             }
-            else
-                return "Pelicula no encontrada";
+            return NotFound();
+            
         }
 
     }

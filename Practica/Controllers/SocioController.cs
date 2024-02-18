@@ -1,80 +1,79 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders;
 using Practica.Dtos;
+using Practica.Modelos;
+using Practica.Repositorys;
 
 namespace Practica.Controllers
 {
 
     [ApiController]
     [Route("api/[controller]")]
-    public class SocioController : Controller
+    public class SocioController : ControllerBase
     {
 
-        private static List<Socio> Socios = new()
+        private readonly ISocioRepository _socioRepository;
+
+        public SocioController(ISocioRepository socioRepository)
         {
-            new Socio { Id = 1, Nombre ="Kevin" , Apellido = "Rocket", Direccion= "Salguero"},
-            new Socio { Id = 2,Nombre ="Borham" , Apellido = "Racoon" , Direccion= "Delia"},
-        };
+
+            _socioRepository = socioRepository;
+        }
 
 
 
         [HttpGet]
-        public List<Socio> ShowAllSocios()
+        public IActionResult Get()
         {
-            return Socios;
+            var socios = _socioRepository.GetAllSocios();
+            return Ok(socios);
         }
 
         [HttpGet("{id}")]
-        public Object ShowOneSocio(int id)
+        public IActionResult Get(int id)
         {
-            Socio seleccionado = Socios.Find(x => x.Id == id);
-            if (seleccionado != null)
-                return seleccionado;
-            else
-                return "Socio no encontrado";
+            var socio = _socioRepository.GetSocio(id);
+            if (socio != null)
+            {
+                return Ok(socio);
+
+            }
+            return NotFound();
         }
 
         [HttpPost]
-        public string CreateSocio(Socio socio)
+        public IActionResult Post(Socio socio)
         {
-            if (socio != null)
-            {
-                Socios.Add(socio);
-                return "Socio agregado correctamente";
-            }
-            else
-                return "No puedes agregar un socio sin datos";   
+            _socioRepository.AddSocio(socio);
+            return CreatedAtAction(nameof(Get), new {id = socio.Id }, socio);
+
         }
 
 
         [HttpPut("{id}")]
-        public string UpdateSocio(Socio socio, int id)
+        public IActionResult Put(Socio updatedSocio, int id)
         {
-            Socio seleccionado = Socios.Find(x => x.Id == id);
-
-            if (seleccionado != null)
+            var socio = _socioRepository.GetSocio(id);
+            if (socio != null)
             {
-                seleccionado.Nombre = socio.Nombre;
-                seleccionado.Apellido = socio.Apellido;
-                seleccionado.Direccion = socio.Direccion;
-                return "Socio modificado exitosamente";
+                socio.Direccion = updatedSocio.Direccion;
+                socio.Nombre = updatedSocio.Nombre;
+                socio.Apellido = updatedSocio.Apellido;
+                return NoContent();
             }
-            else
-                return "Socio inexistente";
-
+            return NotFound();  
         }
 
         [HttpDelete("{id}")]
-        public string DeleteSocio(int id)
+        public IActionResult Delete(int id)
         {
-            Socio seleccionado = Socios.Find(x => x.Id == id);
-
-            if (seleccionado != null)
+            var socio = _socioRepository.GetSocio(id);
+            if (socio != null)
             {
-                Socios.Remove(seleccionado);
-                return "Socio eliminado correctamente";
+                _socioRepository.DeleteSocio(id);
+                return NoContent();
             }
-            else
-                return "Socio inexistente";
+            return NotFound();
         }
     }
 }

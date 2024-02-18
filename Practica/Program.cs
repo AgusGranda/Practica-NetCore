@@ -1,3 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using Practica.Data;
+using Practica.Modelos;
+using Practica.Repositorys;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +11,15 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<PeliculasDbContext>
+    (options => options.UseInMemoryDatabase("PeliculasDb"));
+
+builder.Services.AddDbContext<SociosDbContext>
+    (options => options.UseInMemoryDatabase("SociosDb"));
+
+
+builder.Services.AddScoped<ISocioRepository, SocioRepository> ();
 
 var app = builder.Build();
 
