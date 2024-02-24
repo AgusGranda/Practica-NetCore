@@ -45,7 +45,8 @@ namespace Practica.Repositorys
 
         public void UpdateSocio(Socio socio)
         {
-            _dbContext.Update(socio);
+
+            _dbContext.Socios.Update(socio);
             _dbContext.SaveChanges();
         }
     }

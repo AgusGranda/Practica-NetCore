@@ -20,6 +20,7 @@ builder.Services.AddDbContext<SociosDbContext>
 
 
 builder.Services.AddScoped<ISocioRepository, SocioRepository> ();
+builder.Services.AddScoped<IPeliculaRepository, PeliculaRepository>();
 
 var app = builder.Build();
 

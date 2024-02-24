@@ -59,6 +59,7 @@ namespace Practica.Controllers
                 socio.Direccion = updatedSocio.Direccion;
                 socio.Nombre = updatedSocio.Nombre;
                 socio.Apellido = updatedSocio.Apellido;
+                _socioRepository.UpdateSocio(socio);
                 return NoContent();
             }
             return NotFound();  
